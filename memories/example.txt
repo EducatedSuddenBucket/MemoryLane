@@ -1,6 +1,4 @@
-[title]
-Example
-[/title]
+[title]Memory Title[/title]
 [description]
 This is a example and below is a example image
 [/description]

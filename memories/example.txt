@@ -1,4 +1,5 @@
-[title]Example
+[title]
+Example
 [/title]
 [description]
 This is a example and below is a example image

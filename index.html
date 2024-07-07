@@ -36,40 +36,45 @@
 <body>
     <center><h1>MemoryLane</h1></center>
     <div id="memories"></div>
-
     <script>
         async function fetchMemories() {
             const response = await fetch('https://api.github.com/repos/EducatedSuddenBucket/MemoryLane/contents/memories');
             const files = await response.json();
             const memoriesContainer = document.getElementById('memories');
-
             for (const file of files) {
                 if (file.name.endsWith('.txt')) {
                     const content = await fetch(file.download_url).then(res => res.text());
-                    const lines = content.split('\n');
-                    const title = lines[0];
-                    const description = lines[1];
-                    let imageUrl = '';
-
-                    for (let i = 2; i < lines.length; i++) {
-                        if (lines[i].startsWith('[image]')) {
-                            imageUrl = lines[i].replace('[image]', '').trim();
-                            break;
-                        }
-                    }
-
                     const memoryDiv = document.createElement('div');
                     memoryDiv.className = 'memory';
-                    memoryDiv.innerHTML = `
-                        <h2>${title}</h2>
-                        <p>${description}</p>
-                        ${imageUrl ? `<img src="${imageUrl}" alt="${title}">` : ''}
-                    `;
+                    let currentContent = '';
+                    let isImage = false;
+
+                    content.split('\n').forEach(line => {
+                        if (line.startsWith('[title]')) {
+                            const title = line.replace('[title]', '').replace('[/title]', '').trim();
+                            memoryDiv.innerHTML += `<h2>${title}</h2>`;
+                        } else if (line.startsWith('[image]')) {
+                            isImage = true;
+                            currentContent = '';
+                        } else if (line.startsWith('[/image]')) {
+                            isImage = false;
+                            memoryDiv.innerHTML += `<img src="${currentContent}" alt="Memory Image">`;
+                            currentContent = '';
+                        } else if (line.startsWith('[description]')) {
+                            isImage = false;
+                            currentContent = '';
+                        } else if (line.startsWith('[/description]')) {
+                            memoryDiv.innerHTML += `<p>${currentContent}</p>`;
+                            currentContent = '';
+                        } else {
+                            currentContent += line + (isImage ? '' : '<br>');
+                        }
+                    });
+
                     memoriesContainer.appendChild(memoryDiv);
                 }
             }
         }
-
         fetchMemories();
     </script>
 </body>
